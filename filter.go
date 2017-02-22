@@ -18,7 +18,11 @@ func scanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	if atEOF {
 		return len(data), data, nil
 	}
-	// Request more data.
+
+	if len(data) >= bufio.MaxScanTokenSize {
+		return len(data), data, nil
+	}
+
 	return 0, nil, nil
 }
 
