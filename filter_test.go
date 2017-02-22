@@ -23,6 +23,10 @@ func TestFilter(t *testing.T) {
 		t.Fatal("RFC3339Nano string must be converted to local time")
 	}
 
+	if test("2017-02-22T14:33:23Z") != "2017-02-22T23:33:23+09:00" {
+		t.Fatal("RFC3339 string must be converted to local time")
+	}
+
 	if test("2017-02-22T14:33:23.973") != "2017-02-22T14:33:23.973" {
 		t.Fatal("time string without timezone must not be converted")
 	}

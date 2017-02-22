@@ -29,11 +29,10 @@ func scanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
 func filter(r io.Reader, w io.Writer) error {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(scanLines)
-	re := regexp.MustCompile(`[\d-]+T[\d:]+\.\d+Z`)
+	re := regexp.MustCompile(`[\d-]+T[\d:]+(\.\d+)?Z`)
 	for scanner.Scan() {
 		repl := re.ReplaceAllFunc(scanner.Bytes(), func(bs []byte) []byte {
-			t, e := time.Parse(time.RFC3339Nano, string(bs))
-			if e != nil {
+			if t, e := time.Parse(time.RFC3339Nano, string(bs)); e != nil {
 				return bs
 			} else {
 				return []byte(t.Local().Format(time.RFC3339Nano))
