@@ -45,16 +45,17 @@ where
     W: Write,
 {
     let re = Regex::new(r"[\d-]+T[\d:]+(\.\d+)?([Zz]|[+-][\d:]+)")?;
-    for line in r.lines() {
-        let line = line?;
-        let rep = re.replace_all(line.as_str(), |x: &regex::Captures| {
-            let s = &x[0];
+    let mut buf = String::new();
+    while r.read_line(&mut buf)? > 0 {
+        let rep = re.replace_all(buf.as_str(), |x: &regex::Captures| {
+            let s = x[0].to_string();
             match s.parse::<DateTime<Utc>>() {
                 Ok(t) => t.with_timezone(&chrono::offset::Local).to_rfc3339(),
-                Err(_) => s.to_string(),
+                Err(_) => s,
             }
         });
         w.write_all(rep.as_bytes())?;
+        buf.clear();
     }
     Ok(())
 }
@@ -65,11 +66,11 @@ mod tests {
 
     #[test]
     fn filter_plain_text() -> Result<(), Error> {
-        let src = "moo";
+        let src = "moo\nwoo";
         let mut dst = vec![];
 
         super::filter(&mut src.as_bytes(), &mut dst)?;
-        assert_eq!(String::from_utf8(dst).unwrap(), "moo".to_string());
+        assert_eq!(String::from_utf8(dst).unwrap(), "moo\nwoo".to_string());
         Ok(())
     }
 
