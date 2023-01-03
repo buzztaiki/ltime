@@ -12,7 +12,7 @@ where
     TZ: TimeZone,
     TZ::Offset: Display,
 {
-    let re = Regex::new(r"[\d-]+T[\d:]+(\.\d+)?([Zz]|[+-][\d:]+)")?;
+    let re = Regex::new(r"[\d-]+(T|[ \t]+)[\d:]+(\.\d+)?[ \t]*([Zz]|[+-][\d:]+)")?;
     let mut buf = String::new();
     while r.read_line(&mut buf)? > 0 {
         let rep = re.replace_all(buf.as_str(), |x: &regex::Captures| {
@@ -118,6 +118,19 @@ mod tests {
     #[test]
     fn filter_nonutc() -> Result<(), Error> {
         let src = "2021-01-02T03:04:05-08:00";
+        let mut dst = vec![];
+
+        filter(&mut src.as_bytes(), &mut dst, &jst())?;
+        assert_eq!(
+            String::from_utf8(dst).unwrap(),
+            "2021-01-02T20:04:05+09:00".to_string()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn filter_relax_format() -> Result<(), Error> {
+        let src = "2021-01-02 03:04:05 -0800";
         let mut dst = vec![];
 
         filter(&mut src.as_bytes(), &mut dst, &jst())?;
