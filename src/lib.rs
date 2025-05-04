@@ -2,7 +2,7 @@ use std::error;
 use std::fmt::Display;
 use std::io::{self, BufRead, Write};
 
-use chrono::{offset::TimeZone, DateTime, Utc};
+use chrono::{DateTime, Utc, offset::TimeZone};
 use regex::Regex;
 
 pub fn filter<R, W, TZ>(r: &mut R, w: &mut W, tz: &TZ) -> Result<(), Error>
@@ -60,7 +60,7 @@ impl From<regex::Error> for Error {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{offset::FixedOffset, Duration};
+    use chrono::{Duration, offset::FixedOffset};
 
     fn jst() -> FixedOffset {
         FixedOffset::east_opt(Duration::hours(9).num_seconds() as i32).unwrap()
